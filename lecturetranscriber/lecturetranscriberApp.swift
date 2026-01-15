@@ -5,7 +5,7 @@
 //  Created by Shadow33 on 15/1/26.
 //
 
-// GIVEN AS A TEMPLATE... WILL NEED TO edit this file AFTERWARDS...
+//OK... the template has been set up (hopefully) correctly.
 import SwiftUI
 import SwiftData
 
@@ -13,7 +13,9 @@ import SwiftData
 struct lecturetranscriberApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Name.self,
+            Lecture.self,
+            Course.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
