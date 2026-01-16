@@ -27,17 +27,8 @@ struct CourseCard: View {
                     .multilineTextAlignment(.leading)
                 
                 Spacer()
-                
-                HStack {
-                    Image(systemName: "clock")
-                        .font(.caption)
-                    Text(course.schedule)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.black.opacity(0.6))
             }
-            
+    
             Spacer()
             
             Image(systemName: course.icon)
@@ -91,10 +82,6 @@ struct ClassDetailView: View {
                             Text(course.name)
                                 .font(.system(size: 34, weight: .bold))
                                 .foregroundColor(.white)
-                            
-                            Text(course.schedule)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
                         }
                         .padding(.horizontal)
                         
@@ -167,17 +154,42 @@ struct LectureListRow: View {
                     .background(Color.white.opacity(0.1))
                     .cornerRadius(6)
                     .foregroundColor(.white)
-                
-                Text(lecture.date)
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                    .padding(.top, 4)
             }
         }
         .padding()
         .background(Color(red: 0.1, green: 0.1, blue: 0.1))
         .cornerRadius(16)
         .padding(.horizontal)
+    }
+}
+
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.2))
+                    .frame(width: 48, height: 48)
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .font(.system(size: 20))
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 

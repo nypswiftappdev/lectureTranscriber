@@ -11,9 +11,9 @@ import SwiftData
 
 @main
 struct lecturetranscriberApp: App {
+    @AppStorage("onboarded") private var hasOnBoarded = false
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Name.self,
             Lecture.self,
             Course.self
         ])
@@ -28,7 +28,11 @@ struct lecturetranscriberApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if hasOnBoarded {
+                ClassDashboard()
+            } else {
+                OnboardingView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }
