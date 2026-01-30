@@ -21,7 +21,6 @@ struct ClassDashboard: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 25) {
-                        // Header Section
                         HStack(alignment: .top) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(currentDateString())
@@ -48,7 +47,6 @@ struct ClassDashboard: View {
                         }
                         .padding(.top, 20)
                         
-                        // Search Bar Section
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.gray)
@@ -62,13 +60,11 @@ struct ClassDashboard: View {
                         .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.05)))
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         
-                        // Categories or Stats (Optional, adds "Vibrancy")
                         HStack(spacing: 15) {
                             statCard(title: "Courses", count: "\(courses.count)", icon: "book.closed.fill", color: .blue)
                             statCard(title: "Transcripts", count: "\(courses.reduce(0) { $0 + $1.lectures.count })", icon: "mic.fill", color: .orange)
                         }
                         
-                        // Course List Section
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Active Classes")
                                 .font(.title3.bold())

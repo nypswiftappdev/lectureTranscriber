@@ -108,11 +108,11 @@ struct ClassDetailView: View {
                             
                             HStack {
                                 Circle()
-                                    .fill(course.themeColor)
-                                    .frame(width: 10, height: 10)
+                                    .fill(course.themeColor == Color.gray ? Color.white : course.themeColor)
+                                    .frame(width: 8, height: 8)
                                 Text("\(course.lectures.count) Transcripts Saved")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(.white.opacity(0.6))
                             }
                         }
                         .padding(.horizontal)
@@ -155,9 +155,9 @@ struct ClassDetailView: View {
                     .foregroundColor(.black)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(course.themeColor)
+                    .background(course.themeColor == Color.gray ? Color.white : course.themeColor)
                     .cornerRadius(20)
-                    .shadow(color: course.themeColor.opacity(0.4), radius: 10, x: 0, y: 5)
+                    .shadow(color: (course.themeColor == Color.gray ? Color.white : course.themeColor).opacity(0.4), radius: 10, x: 0, y: 5)
                 }
                 .padding(24)
             }
