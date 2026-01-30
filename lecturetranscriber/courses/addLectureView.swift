@@ -5,7 +5,7 @@ import Foundation
 struct AddLectureView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: [SortDescriptor(\Tag.name)]) private var allTags: [Tag]
+    @Query(sort: \Tag.name) private var allTags: [Tag]
     
     let course: Course
     
@@ -15,44 +15,27 @@ struct AddLectureView: View {
     @State private var newTagName = ""
     @State private var selectedTagIDs: Set<UUID> = []
     
-    // Break up to fix error
     private var headerFields: some View {
         VStack(spacing: 20) {
-            customTextField(title: "Lecture Title", placeholder: "e.g. Introduction to Calculus", text: $title)
-            summaryField
-            customTextField(title: "Duration (mock)", placeholder: "e.g. 45:00", text: $duration)
+            LTFormLabeledTextField(
+                title: "Lecture Title",
+                placeholder: "e.g. Introduction to Calculus",
+                text: $title
+            )
+
+            LTFormSummaryEditor(
+                title: "Summary",
+                placeholder: "Write a brief summary…",
+                text: $summary
+            )
+
+            LTFormLabeledTextField(
+                title: "Duration (mock)",
+                placeholder: "e.g. 45:00",
+                text: $duration
+            )
         }
         .padding(.horizontal)
-    }
-
-    private var summaryField: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Summary")
-                .font(.caption.bold())
-                .foregroundColor(.gray)
-                .textCase(.uppercase)
-            
-            ZStack(alignment: .topLeading) {
-                if summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("Write a brief summary…")
-                        .foregroundColor(.white.opacity(0.2))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                }
-                
-                TextEditor(text: $summary)
-                    .frame(minHeight: 110)
-                    .padding(8)
-                    .foregroundColor(.white)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    )
-            }
-        }
     }
 
     private var tagsSection: some View {
@@ -95,12 +78,9 @@ struct AddLectureView: View {
             }
 
             HStack(spacing: 10) {
-                placeholderTextField(placeholder: "Create a tag…", text: $newTagName)
-                #if os(iOS)
+                LTFormPlaceholderTextField(placeholder: "Create a tag…", text: $newTagName)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled()
-                #endif
-
                 Button(action: createTag) {
                     Image(systemName: "plus")
                         .font(.title3.bold())
@@ -161,36 +141,6 @@ struct AddLectureView: View {
                 }
             }
         }
-    }
-    
-    private func customTextField(title: String, placeholder: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.caption.bold())
-                .foregroundColor(.gray)
-                .textCase(.uppercase)
-            
-            placeholderTextField(placeholder: placeholder, text: text)
-        }
-    }
-    
-    private func placeholderTextField(placeholder: String, text: Binding<String>) -> some View {
-        ZStack(alignment: .leading) {
-            if text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text(placeholder)
-                    .foregroundColor(.white.opacity(0.2))
-                    .padding(.horizontal, 16)
-            }
-            TextField("", text: text)
-                .foregroundColor(.white)
-                .padding()
-        }
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-        )
     }
     
     private func addLecture() {
