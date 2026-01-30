@@ -17,6 +17,9 @@ final class Lecture: Identifiable {
     var summary: String
     var course: Course?
     
+    @Relationship
+    var tags: [Tag] = []
+    
     init(title: String, duration: String, summary: String) {
         self.title = title
         self.duration = duration
@@ -45,6 +48,25 @@ final class Course: Identifiable {
     // Computed property to convert hex string to Color
     var themeColor: Color {
         Color(hex: themeColorHex) ?? Color.gray
+    }
+}
+
+@Model
+final class Tag: Identifiable {
+    var id: UUID = UUID()
+    var name: String
+    var colorHex: String
+    
+    @Relationship(inverse: \Lecture.tags)
+    var lectures: [Lecture] = []
+    
+    init(name: String, colorHex: String) {
+        self.name = name
+        self.colorHex = colorHex
+    }
+    
+    var color: Color {
+        Color(hex: colorHex) ?? .gray
     }
 }
 

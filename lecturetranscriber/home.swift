@@ -12,6 +12,7 @@ struct ClassDashboard: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var courses: [Course]
     @State private var showingAddCourse = false
+    @AppStorage("username") private var userName: String = ""
     
     var body: some View {
         NavigationStack {
@@ -27,8 +28,12 @@ struct ClassDashboard: View {
                                     .foregroundColor(.gray)
                                     .textCase(.uppercase)
                                 
+                                Text(userName.isEmpty ? "Hey!" : "Hey, \(userName)")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.white)
+                                
                                 Text("Your Classes")
-                                    .font(.system(size: 40, weight: .bold))
+                                    .font(.system(size: 22, weight: .semibold))
                                     .foregroundColor(.white)
                             }
                             Spacer()
@@ -67,6 +72,9 @@ struct ClassDashboard: View {
             }
         }
         .accentColor(.white)
+        .sheet(isPresented: $showingAddCourse) {
+            AddCourseView()
+        }
     }
     
     private func currentDateString() -> String {

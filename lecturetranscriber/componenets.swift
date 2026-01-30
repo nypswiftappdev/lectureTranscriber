@@ -45,6 +45,7 @@ struct CourseCard: View {
 struct ClassDetailView: View {
     let course: Course
     @Environment(\.dismiss) var dismiss
+    @State private var showingAddLecture = false
     
     var body: some View {
         ZStack {
@@ -93,17 +94,24 @@ struct ClassDetailView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal)
                             
-                            ForEach(course.lectures) { lecture in
-                                LectureListRow(lecture: lecture, color: course.themeColor)
+                            if course.lectures.isEmpty {
+                                Text("No lectures yet. Tap below to add one.")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                                    .padding(.top, 10)
+                            } else {
+                                ForEach(course.lectures) { lecture in
+                                    LectureListRow(lecture: lecture, color: course.themeColor)
+                                }
                             }
                         }
                     }
                 }
                 
-                Button(action: { print("Recording for \(course.name)") }) {
+                Button(action: { showingAddLecture = true }) {
                     HStack {
-                        Image(systemName: "mic.fill")
-                        Text("Record Lecture")
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add Lecture")
                     }
                     .font(.headline)
                     .foregroundColor(.black)
@@ -116,6 +124,10 @@ struct ClassDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .tint(course.themeColor)
+        .sheet(isPresented: $showingAddLecture) {
+            AddLectureView(course: course)
+        }
     }
 }
 
@@ -142,6 +154,23 @@ struct LectureListRow: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                     .lineLimit(2)
+                
+                if !lecture.tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(lecture.tags) { tag in
+                                Text(tag.name)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(tag.color)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
             
             Spacer()

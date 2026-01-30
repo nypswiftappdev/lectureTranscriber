@@ -15,7 +15,8 @@ struct lecturetranscriberApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Lecture.self,
-            Course.self
+            Course.self,
+            Tag.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
