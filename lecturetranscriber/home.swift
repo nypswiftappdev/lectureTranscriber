@@ -10,7 +10,7 @@ import SwiftData
 
 struct ClassDashboard: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var courses: [Course]
+    @Query(sort: \Course.name) private var courses: [Course]
     @State private var showingAddCourse = false
     @AppStorage("username") private var userName: String = ""
     
@@ -21,46 +21,69 @@ struct ClassDashboard: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 25) {
-                        HStack {
-                            VStack(alignment: .leading) {
+                        // Header Section
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(currentDateString())
-                                    .font(.subheadline)
+                                    .font(.caption.bold())
                                     .foregroundColor(.gray)
                                     .textCase(.uppercase)
                                 
                                 Text(userName.isEmpty ? "Hey!" : "Hey, \(userName)")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Text("Your Classes")
-                                    .font(.system(size: 22, weight: .semibold))
+                                    .font(.system(size: 34, weight: .bold))
                                     .foregroundColor(.white)
                             }
+                            
                             Spacer()
+                            
                             Button(action: { showingAddCourse = true }) {
                                 Image(systemName: "plus")
-                                    .font(.title2)
+                                    .font(.title3.bold())
                                     .foregroundColor(.black)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 44, height: 44)
                                     .background(Color.white)
                                     .clipShape(Circle())
+                                    .shadow(color: .white.opacity(0.3), radius: 10, x: 0, y: 5)
                             }
                         }
                         .padding(.top, 20)
                         
+                        // Search Bar Section
                         HStack {
                             Image(systemName: "magnifyingglass")
-                            Text("Search for a lecture...")
+                                .foregroundColor(.gray)
+                            Text("Search lectures...")
+                                .foregroundColor(.gray.opacity(0.6))
+                            Spacer()
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                .foregroundColor(.gray)
                         }
                         .padding()
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.2), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.05)))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         
-                        VStack(spacing: 20) {
-                            ForEach(courses) { course in
-                                NavigationLink(destination: ClassDetailView(course: course)) {
-                                    CourseCard(course: course)
+                        // Categories or Stats (Optional, adds "Vibrancy")
+                        HStack(spacing: 15) {
+                            statCard(title: "Courses", count: "\(courses.count)", icon: "book.closed.fill", color: .blue)
+                            statCard(title: "Transcripts", count: "\(courses.reduce(0) { $0 + $1.lectures.count })", icon: "mic.fill", color: .orange)
+                        }
+                        
+                        // Course List Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Active Classes")
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                            
+                            if courses.isEmpty {
+                                emptyState
+                            } else {
+                                VStack(spacing: 20) {
+                                    ForEach(courses) { course in
+                                        NavigationLink(destination: ClassDetailView(course: course)) {
+                                            CourseCard(course: course)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
                                 }
                             }
                         }
@@ -75,6 +98,40 @@ struct ClassDashboard: View {
         .sheet(isPresented: $showingAddCourse) {
             AddCourseView()
         }
+    }
+    
+    private var emptyState: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 60))
+                .foregroundColor(.white.opacity(0.1))
+            Text("No classes added yet.\nTap the + button to get started.")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+    }
+    
+    private func statCard(title: String, count: String, icon: String, color: Color) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(count)
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            Spacer()
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.title3)
+        }
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
     }
     
     private func currentDateString() -> String {

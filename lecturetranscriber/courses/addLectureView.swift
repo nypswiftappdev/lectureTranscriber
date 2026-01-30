@@ -172,8 +172,6 @@ struct AddLectureView: View {
     private func createTag() {
         let trimmed = newTagName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        
-        // Use the course theme color by default so tags feel consistent per class.
         let tag = Tag(name: trimmed, colorHex: course.themeColorHex)
         modelContext.insert(tag)
         selectedTagIDs.insert(tag.id)

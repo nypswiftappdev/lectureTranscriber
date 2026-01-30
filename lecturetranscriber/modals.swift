@@ -8,7 +8,6 @@ import SwiftUI
 import Foundation
 import SwiftData
 
-
 @Model
 final class Lecture: Identifiable {
     var id: UUID = UUID()
@@ -87,14 +86,13 @@ extension Color {
         self.init(red: r, green: g, blue: b)
     }
     
-    // Convert Color to hex string for storage
+    // Convert Color to hex string for storage without UIKit/AppKit dependency
     var toHex: String {
-        guard let components = self.cgColor?.components, components.count >= 3 else {
-            return "#808080"
-        }
-        let r = Int(components[0] * 255.0)
-        let g = Int(components[1] * 255.0)
-        let b = Int(components[2] * 255.0)
-        return String(format: "#%02X%02X%02X", r, g, b)
+        // This is a SwiftUI-only way to get components (works on iOS and macOS)
+        let resolved = self.resolve(in: .init())
+        return String(format: "#%02X%02X%02X", 
+                      Int(resolved.red * 255), 
+                      Int(resolved.green * 255), 
+                      Int(resolved.blue * 255))
     }
 }

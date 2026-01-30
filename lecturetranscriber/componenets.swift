@@ -10,35 +10,49 @@ struct CourseCard: View {
     let course: Course
     
     var body: some View {
-        HStack(alignment: .top) {
+        ZStack(alignment: .bottomTrailing) {
+            LinearGradient(
+                colors: [course.themeColor, course.themeColor.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            Image(systemName: course.icon)
+                .font(.system(size: 100))
+                .foregroundColor(.white.opacity(0.15))
+                .offset(x: 20, y: 20)
+                .rotationEffect(.degrees(-15))
+            
             VStack(alignment: .leading, spacing: 12) {
                 Text(course.code)
                     .font(.caption)
                     .fontWeight(.bold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color.black.opacity(0.1))
+                    .background(.white.opacity(0.2))
                     .cornerRadius(8)
-                    .foregroundColor(.black.opacity(0.7))
+                    .foregroundColor(.white)
                 
                 Text(course.name)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.black)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.leading)
+                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 
                 Spacer()
+                
+                HStack {
+                    Label("\(course.lectures.count) Lectures", systemImage: "play.circle.fill")
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.9))
+                    Spacer()
+                }
             }
-    
-            Spacer()
-            
-            Image(systemName: course.icon)
-                .font(.title)
-                .foregroundColor(.black.opacity(0.5))
+            .padding(24)
         }
-        .padding(24)
         .frame(height: 180)
-        .background(course.themeColor)
         .cornerRadius(24)
+        .shadow(color: course.themeColor.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -52,53 +66,75 @@ struct ClassDetailView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Custom Header
                 HStack {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title2)
+                        Image(systemName: "chevron.left")
+                            .font(.title3.bold())
                             .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Color.white.opacity(0.1))
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    
                     Spacer()
-                    Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(.white)
+                    
+                    Text(course.code)
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.7))
+                    
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        Image(systemName: "ellipsis")
+                            .font(.title3.bold())
+                            .foregroundColor(.white)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 20)
+                .padding(.bottom, 10)
                 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 30) {
                         
+                        // Hero Title
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(course.code)
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .padding(8)
-                                .background(course.themeColor)
-                                .foregroundColor(.black)
-                                .cornerRadius(8)
-                            
                             Text(course.name)
                                 .font(.system(size: 34, weight: .bold))
                                 .foregroundColor(.white)
+                            
+                            HStack {
+                                Circle()
+                                    .fill(course.themeColor)
+                                    .frame(width: 10, height: 10)
+                                Text("\(course.lectures.count) Transcripts Saved")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
                         }
                         .padding(.horizontal)
                         
-                        Divider().background(Color.gray.opacity(0.3))
-                        
+                        // Transcripts List
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Transcripts")
-                                .font(.headline)
+                            Text("Recent Lectures")
+                                .font(.title3.bold())
                                 .foregroundColor(.white)
                                 .padding(.horizontal)
                             
                             if course.lectures.isEmpty {
-                                Text("No lectures yet. Tap below to add one.")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal)
-                                    .padding(.top, 10)
+                                VStack(spacing: 20) {
+                                    Image(systemName: "mic.badge.plus")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(course.themeColor.opacity(0.5))
+                                    Text("No lectures yet.\nStart by adding your first one.")
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
                             } else {
                                 ForEach(course.lectures) { lecture in
                                     LectureListRow(lecture: lecture, color: course.themeColor)
@@ -106,19 +142,22 @@ struct ClassDetailView: View {
                             }
                         }
                     }
+                    .padding(.top, 20)
                 }
                 
+                // Add Button
                 Button(action: { showingAddLecture = true }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                        Text("Add Lecture")
+                        Text("Add New Lecture")
                     }
                     .font(.headline)
                     .foregroundColor(.black)
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(course.themeColor)
-                    .cornerRadius(30)
+                    .cornerRadius(20)
+                    .shadow(color: course.themeColor.opacity(0.4), radius: 10, x: 0, y: 5)
                 }
                 .padding(24)
             }
@@ -136,11 +175,11 @@ struct LectureListRow: View {
     let color: Color
     
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .center, spacing: 16) {
             ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(width: 48, height: 48)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(color.opacity(0.15))
+                    .frame(width: 50, height: 50)
                 Image(systemName: "play.fill")
                     .foregroundColor(color)
             }
@@ -150,45 +189,40 @@ struct LectureListRow: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text(lecture.summary)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .lineLimit(2)
-                
                 if !lecture.tags.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(lecture.tags) { tag in
-                                Text(tag.name)
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundColor(.black)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(tag.color)
-                                    .clipShape(Capsule())
-                            }
+                    HStack(spacing: 6) {
+                        ForEach(lecture.tags) { tag in
+                            Text(tag.name)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(tag.color)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(tag.color.opacity(0.1))
+                                .cornerRadius(4)
                         }
                     }
-                    .padding(.top, 4)
                 }
             }
             
             Spacer()
             
-            VStack(alignment: .trailing) {
-                Text(lecture.duration)
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .padding(6)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(6)
-                    .foregroundColor(.white)
-            }
+            Text(lecture.duration)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.gray)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.white.opacity(0.05))
+                .cornerRadius(6)
         }
         .padding()
-        .background(Color(red: 0.1, green: 0.1, blue: 0.1))
+        .background(Color.white.opacity(0.03))
         .cornerRadius(16)
         .padding(.horizontal)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                .padding(.horizontal)
+        )
     }
 }
 
@@ -221,5 +255,3 @@ struct FeatureRow: View {
         }
     }
 }
-
-
