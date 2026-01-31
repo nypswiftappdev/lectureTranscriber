@@ -12,18 +12,15 @@ struct LectureRecordingView: View {
     @State private var isRecording = false
     @State private var isPaused = false
     @State private var recordingDuration: TimeInterval = 0
+    @State private var startTime: Date?
     @State private var timer: Timer?
     @State private var transcriptText: String = ""
-    
-    // Post-Recording State
     @State private var hasStoppedRecording = false
     @State private var title = ""
     @State private var summary = ""
     @State private var newTagName = ""
     @State private var selectedTagIDs: Set<UUID> = []
-    
-    // Mock transcription update for UI demo
-    @State private var mockTimer: Timer?
+    @State private var visualizerBars: [CGFloat] = Array(repeating: 10, count: 20)
     
     var body: some View {
         NavigationStack {
@@ -61,12 +58,24 @@ struct LectureRecordingView: View {
     private var recordingInterface: some View {
         VStack(spacing: 30) {
             
-            // Timer Display
-            Text(timeString(from: recordingDuration))
-                .font(.system(size: 60, weight: .thin).monospacedDigit())
-                .foregroundColor(.white)
-                .contentTransition(.numericText())
-                .animation(.default, value: recordingDuration)
+            VStack(spacing: 10) {
+                Text(timeString(from: recordingDuration))
+                    .font(.system(size: 60, weight: .thin).monospacedDigit())
+                    .foregroundColor(.white)
+                    .contentTransition(.numericText())
+                    .animation(.default, value: recordingDuration)
+                
+                HStack(spacing: 4) {
+                    ForEach(0..<20, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(course.themeColor.opacity(0.8))
+                            .frame(width: 4, height: isRecording ? visualizerBars[index] : 4)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.5), value: visualizerBars[index])
+                    }
+                }
+                .frame(height: 50)
+                .opacity(recordingDuration > 0 ? 1 : 0)
+            }
             
             // Live Transcript View
             VStack(alignment: .leading) {
@@ -158,14 +167,12 @@ struct LectureRecordingView: View {
                 .background(Color.white.opacity(0.05))
                 .cornerRadius(12)
                 
-                // Title Input
                 LTFormLabeledTextField(
                     title: "Lecture Title",
                     placeholder: "e.g. Introduction to Calculus",
                     text: $title
                 )
                 
-                // Transcript Preview (ReadOnly here)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("TRANSCRIPT")
                         .font(.caption.bold())
@@ -178,15 +185,13 @@ struct LectureRecordingView: View {
                         .padding()
                         .background(Color.white.opacity(0.05))
                         .cornerRadius(12)
-                        .frame(maxHeight: 200) // Limit height
+                        .frame(maxHeight: 200)
                 }
 
-                // Tags Section
                 tagsSection
                 
                 Spacer()
                 
-                // Save Button
                 Button(action: saveLecture) {
                     Text("Save Lecture")
                         .font(.headline)
@@ -275,14 +280,22 @@ struct LectureRecordingView: View {
             isRecording = true
             isPaused = false
             
-            // Start timer
-            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                recordingDuration += 1
-                // Mock transcript growth
-                if transcriptText.isEmpty {
-                    transcriptText = "Here is some simulated transcription text"
-                } else {
-                    transcriptText += " that keeps growing as you record more..."
+            // Use 0.05s interval for smooth UI updates
+            timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+                recordingDuration += 0.05
+                
+                // Update fake visualizer bars
+                for i in 0..<visualizerBars.count {
+                    visualizerBars[i] = CGFloat.random(in: 10...40)
+                }
+                
+                // Mock transcript growth (slower than UI update)
+                if Int(recordingDuration * 20) % 40 == 0 { // approx every 2 seconds
+                    if transcriptText.isEmpty {
+                        transcriptText = "Here is some simulated transcription text"
+                    } else {
+                        transcriptText += " that keeps growing as you record more..."
+                    }
                 }
             }
         }
@@ -307,6 +320,7 @@ struct LectureRecordingView: View {
         recordingDuration = 0
         transcriptText = ""
         hasStoppedRecording = false
+        visualizerBars = Array(repeating: 10, count: 20)
     }
     
     private func saveLecture() {
@@ -318,10 +332,9 @@ struct LectureRecordingView: View {
     }
     
     private func timeString(from timeInterval: TimeInterval) -> String {
-        let seconds = Int(timeInterval)
-        let minutes = seconds / 60
-        let remainingSeconds = seconds % 60
-        return String(format: "%02d:%02d", minutes, remainingSeconds)
+        let minutes = Int(timeInterval) / 60
+        let seconds = Int(timeInterval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
     
     private func toggleTag(_ tag: Tag) {
