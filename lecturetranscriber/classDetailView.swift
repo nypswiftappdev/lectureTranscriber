@@ -109,7 +109,7 @@ struct ClassDetailView: View {
         .navigationBarHidden(true)
         .tint(course.themeColor)
         .sheet(isPresented: $showingAddLecture) {
-            AddLectureView(course: course)
+            LectureRecordingView(course: course)
         }
     }
 }
