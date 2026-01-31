@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import Speech
 
 struct LectureRecordingView: View {
     @Environment(\.modelContext) private var modelContext
@@ -9,12 +10,21 @@ struct LectureRecordingView: View {
     
     let course: Course
     
+    @StateObject private var transcriptionManager = TranscriptionManager()
     @State private var isRecording = false
     @State private var isPaused = false
     @State private var recordingDuration: TimeInterval = 0
     @State private var startTime: Date?
     @State private var timer: Timer?
-    @State private var transcriptText: String = ""
+    @State private var committedTranscript: String = ""
+    
+    private var transcriptText: String {
+        let current = transcriptionManager.transcript
+        if current.isEmpty { return committedTranscript }
+        if committedTranscript.isEmpty { return current }
+        return committedTranscript + " " + current
+    }
+    
     @State private var hasStoppedRecording = false
     @State private var title = ""
     @State private var summary = ""
@@ -39,6 +49,9 @@ struct LectureRecordingView: View {
             }
             .navigationTitle(hasStoppedRecording ? "Save Lecture" : "New Recording")
             .navigationBarTitleDisplayMode(.inline)
+            .alert(item: $transcriptionManager.error) { error in
+                Alert(title: Text("Error"), message: Text(error.message), dismissButton: .default(Text("OK")))
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: { dismiss() }) {
@@ -77,7 +90,6 @@ struct LectureRecordingView: View {
                 .opacity(recordingDuration > 0 ? 1 : 0)
             }
             
-            // Live Transcript View
             VStack(alignment: .leading) {
                 Text("LIVE TRANSCRIPT")
                     .font(.caption.bold())
@@ -271,12 +283,16 @@ struct LectureRecordingView: View {
     private func toggleRecording() {
         if isRecording {
             // Pause
+            transcriptionManager.stopRecording()
             isRecording = false
             isPaused = true
             timer?.invalidate()
             timer = nil
         } else {
-            // Start / Resume
+            if !transcriptionManager.transcript.isEmpty {
+                 committedTranscript = transcriptText
+            }
+            transcriptionManager.startRecording()
             isRecording = true
             isPaused = false
             
@@ -288,20 +304,14 @@ struct LectureRecordingView: View {
                 for i in 0..<visualizerBars.count {
                     visualizerBars[i] = CGFloat.random(in: 10...40)
                 }
-                
-                // Mock transcript growth (slower than UI update)
-                if Int(recordingDuration * 20) % 40 == 0 { // approx every 2 seconds
-                    if transcriptText.isEmpty {
-                        transcriptText = "Here is some simulated transcription text"
-                    } else {
-                        transcriptText += " that keeps growing as you record more..."
-                    }
-                }
             }
         }
     }
     
     private func stopRecording() {
+        committedTranscript = transcriptText
+        transcriptionManager.stopRecording()
+        
         isRecording = false
         isPaused = false
         timer?.invalidate()
@@ -313,12 +323,13 @@ struct LectureRecordingView: View {
     }
     
     private func resetRecording() {
+        transcriptionManager.reset()
+        committedTranscript = ""
         isRecording = false
         isPaused = false
         timer?.invalidate()
         timer = nil
         recordingDuration = 0
-        transcriptText = ""
         hasStoppedRecording = false
         visualizerBars = Array(repeating: 10, count: 20)
     }
